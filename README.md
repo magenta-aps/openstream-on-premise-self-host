@@ -55,7 +55,80 @@ sudo cp rootCA.pem /usr/local/share/ca-certificates/openstream.crt
 sudo update-ca-certificates
 ```
 
-### 4. Pre-create data directories with correct ownership
+### 4. Configure realms
+
+Edit `realms.json` in the project root to define the organisations, sub-organisations, branches, and users that OpenStream will provision on startup. The file is mounted read-only into the container and processed by an idempotent command on every startup, so it is safe to leave `REALM_CONFIG_FILE` set after the first run.
+
+The file is a JSON array where each element is a realm (organisation):
+
+```json
+[
+  {
+    "uri": "my-org",
+    "name": "My Organisation",
+    "suborganisations": [
+      {
+        "name": "Department A",
+        "branches": ["Branch 1", "Branch 2"]
+      }
+    ],
+    "users": [
+      {
+        "username": "org_admin",
+        "password": "change_me",
+        "kc_role": "org_admin",
+        "first_name": "Organisation",
+        "last_name": "Admin",
+        "roles": [
+          { "role": "org_admin" }
+        ]
+      },
+      {
+        "username": "alice",
+        "password": "change_me",
+        "kc_role": "org_user",
+        "first_name": "Alice",
+        "last_name": "Jensen",
+        "roles": [
+          {
+            "role": "employee",
+            "suborganisation": "Department A",
+            "branch": "Branch 1"
+          }
+        ]
+      }
+    ]
+  }
+]
+```
+
+**Field reference**
+
+| Field | Required | Description |
+|---|---|---|
+| `uri` | yes | Unique URL-safe slug for the organisation (e.g. `my-org`) |
+| `name` | yes | Display name |
+| `suborganisations` | no | List of sub-organisations; if omitted a "Global" sub-org is created automatically |
+| `suborganisations[].name` | yes | Sub-organisation name, unique within the realm |
+| `suborganisations[].branches` | no | List of branch name strings within the sub-organisation |
+| `users[].username` | yes | Login username, unique within the realm |
+| `users[].password` | yes | Initial password (also set in Keycloak) |
+| `users[].kc_role` | yes | Keycloak role: `org_admin` or `org_user` |
+| `users[].first_name` | no | |
+| `users[].last_name` | no | |
+| `users[].roles` | no | Application-level role assignments (see table below) |
+
+**Application roles (`users[].roles[].role`)**
+
+| Role | `suborganisation` | `branch` |
+|---|---|---|
+| `super_admin` | — | — |
+| `org_admin` | — | — |
+| `suborg_admin` | required | — |
+| `branch_admin` | required | required |
+| `employee` | required | required |
+
+### 5. Pre-create data directories with correct ownership
 
 PostgreSQL and MinIO run as non-root users and will fail if the data directories are owned by root:
 
@@ -66,7 +139,7 @@ sudo chown 1000:1000 data/minio
 
 This only needs to be done once before the first run.
 
-### 5. Start the stack
+### 6. Start the stack
 
 ```bash
 docker compose up 
