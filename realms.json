@@ -1,0 +1,21 @@
+[
+  {
+    "uri": "your-realm-uri",
+    "name": "Your Organisation Name",
+    "suborganisations": [],
+    "users": [
+      {
+        "username": "org_admin",
+        "password": "change_me",
+        "kc_role": "org_admin",
+        "first_name": "Organisation",
+        "last_name": "Admin",
+        "roles": [
+          {
+            "role": "org_admin"
+          }
+        ]
+      }
+    ]
+  }
+]

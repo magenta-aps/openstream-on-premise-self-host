@@ -31,10 +31,12 @@ services:
 
   openstream:
     container_name: openstream
-    image: magentaaps/openstream:6.16.1-dev
+    image: magentaaps/openstream:6.16.2-dev
     pull_policy: if_not_present
     env_file:
       - ./env/backend.env
+    volumes:
+      - ./realms.json:/app/realms.json:ro
     environment:
       ALLOWED_HOSTS: "${SERVER_IP},localhost"
       CSRF_TRUSTED_ORIGINS: "https://${SERVER_IP},https://${SERVER_IP}:8443"
@@ -53,7 +55,7 @@ services:
 
   cron:
     container_name: openstream-cron
-    image: magentaaps/openstream:6.16.1-dev
+    image: magentaaps/openstream:6.16.2-dev
     pull_policy: if_not_present
     env_file:
       - ./env/backend.env
@@ -107,7 +109,7 @@ services:
 
   frontend:
     container_name: openstream-frontend
-    image: magentaaps/openstream-frontend:6.16.1-dev
+    image: magentaaps/openstream-frontend:6.16.2-dev
     pull_policy: if_not_present
     env_file:
       - ./env/frontend.env
@@ -121,7 +123,7 @@ services:
 
   polling-server:
     container_name: openstream-polling
-    image: magentaaps/openstream-polling:6.16.1-dev
+    image: magentaaps/openstream-polling:6.16.2-dev
     pull_policy: if_not_present
     env_file:
       - ./env/polling.env
