@@ -14,7 +14,7 @@ Docker Compose setup for running OpenStream on a local on-premise server using p
 Create `.env` in the project root and set `SERVER_IP` to the IP address of the server:
 
 ```
-SERVER_IP=192.168.1.100
+SERVER_IP=<YOUR_IP>
 ```
 
 This is the only place you need to define it — all services pick it up automatically.
@@ -33,7 +33,9 @@ Replace all `changeme` values across the env files. The comments in each file in
 
 ### 3. Generate a TLS certificate
 
-Run these commands from the `openstream-deploy/` directory:
+Create a `certs/` folder in the project root.
+
+Then run these commands from the project root:
 
 ```bash
 mkcert -install

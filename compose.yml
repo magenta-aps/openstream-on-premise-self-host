@@ -45,6 +45,7 @@ services:
       FRONTEND_HOST: "https://${SERVER_IP}"
       FRONTEND_PASSWORD_RESET_URL: "https://${SERVER_IP}/reset-password"
       MINIO_PUBLIC_URL: "https://${SERVER_IP}:9443"
+      KEYCLOAK_REALM_BACKEND_BASE_URL: "https://${SERVER_IP}:8443"
     networks:
       - openstream_net
     depends_on:
@@ -67,6 +68,7 @@ services:
       FRONTEND_HOST: "https://${SERVER_IP}"
       FRONTEND_PASSWORD_RESET_URL: "https://${SERVER_IP}/reset-password"
       MINIO_PUBLIC_URL: "https://${SERVER_IP}:9443"
+      KEYCLOAK_REALM_BACKEND_BASE_URL: "https://${SERVER_IP}:8443"
     networks:
       - openstream_net
     entrypoint: ["/usr/local/bin/supercronic", "/crontab"]
@@ -138,6 +140,8 @@ services:
     pull_policy: if_not_present
     env_file:
       - ./env/minio.env
+    environment:
+      MINIO_BROWSER_REDIRECT_URL: "https://${SERVER_IP}:9444"
     networks:
       - openstream_net
     volumes:
