@@ -44,17 +44,26 @@ mkcert -cert-file certs/cert.pem -key-file certs/key.pem <SERVER_IP>
 
 Replace `<SERVER_IP>` with the same IP set in `.env`. The `certs/` directory is already created.
 
-To allow other machines to trust this certificate, distribute the root CA:
+To distribute the root CA to other clients, run:
 
 ```bash
-cat "$(mkcert -CAROOT)/rootCA.pem"
+bash scripts/export-ca/export-ca.sh
 ```
 
-Import that certificate into the trust store of each client machine. On Linux:
+This copies the root CA into `ca-bundle/rootCA.pem`. Send that file to each client.
+
+#### Importing the CA in a browser
+
+**Chrome/Edge:** Go to `Settings → Privacy and security → Security → Manage certificates → Authorities` and import `rootCA.pem`.
+
+**Firefox (and Firefox-based browsers like Zen):** Go to `Settings → Privacy & Security → View Certificates → Authorities → Import` and import `rootCA.pem`.
+
+#### Kiosk devices
+
+For kiosk devices running Chrome or Chromium you can bypass TLS validation entirely with a flag instead of importing the CA:
 
 ```bash
-sudo cp rootCA.pem /usr/local/share/ca-certificates/openstream.crt
-sudo update-ca-certificates
+chromium-browser --kiosk --ignore-certificate-errors https://<SERVER_IP>/connect-screen?apiKey=<BRANCH_API_KEY>
 ```
 
 ### 4. Configure realms

@@ -1,3 +1,4 @@
 certs/
 data/
+ca-bundle/
 .env
