@@ -169,10 +169,11 @@ Once running, the services are available at:
 | Keycloak | `https://SERVER_IP:8080` |
 | MinIO | `https://SERVER_IP:9443` |
 | Polling (SSE) | `https://SERVER_IP:3000` |
+| Collab (WebSocket) | `wss://SERVER_IP:3001` |
 
 ## Updating to a new version
 
-Edit `compose.yml` and change the image tags for `openstream`, `openstream-frontend`, and `openstream-polling`, then pull and restart:
+Edit `compose.yml` and change the image tags for `openstream`, `openstream-frontend`, `openstream-polling`, and `openstream-collab`, then pull and restart:
 
 ```bash
 docker compose pull

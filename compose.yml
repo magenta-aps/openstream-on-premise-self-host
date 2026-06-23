@@ -17,6 +17,7 @@ services:
       - "9443:9443"
       - "9444:9444"
       - "3000:3000"
+      - "3001:3001"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
@@ -28,6 +29,7 @@ services:
       - keycloak
       - minio
       - polling-server
+      - collab-server
 
   openstream:
     container_name: openstream
@@ -118,6 +120,24 @@ services:
     environment:
       BASE_URL: "https://${SERVER_IP}:8443"
       POLLING_URL: "https://${SERVER_IP}:3000/events"
+      COLLAB_URL: "wss://${SERVER_IP}:3001"
+    networks:
+      - openstream_net
+    depends_on:
+      - openstream
+
+  collab-server:
+    container_name: openstream-collab
+    image: magentaaps/openstream-collab:6.16.2-dev
+    pull_policy: if_not_present
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      DJANGO_BASE_URL: "http://openstream:8000"
+      # Shared secret with Django. MUST match COLLAB_SERVER_API_KEY in
+      # env/backend.env. Required in production — the sidecar refuses to start
+      # without it.
+      COLLAB_SERVER_API_KEY: changeme_collab_key
     networks:
       - openstream_net
     depends_on:
