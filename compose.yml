@@ -33,7 +33,7 @@ services:
 
   openstream:
     container_name: openstream
-    image: magentaaps/openstream:7.2.0-dev
+    image: magentaaps/openstream:7.2.11-dev
     pull_policy: if_not_present
     env_file:
       - ./env/backend.env
@@ -61,7 +61,7 @@ services:
 
   cron:
     container_name: openstream-cron
-    image: magentaaps/openstream:7.2.0-dev
+    image: magentaaps/openstream:7.2.11-dev
     pull_policy: if_not_present
     env_file:
       - ./env/backend.env
@@ -119,7 +119,7 @@ services:
 
   frontend:
     container_name: openstream-frontend
-    image: magentaaps/openstream-frontend:7.2.0-dev
+    image: magentaaps/openstream-frontend:7.2.11-dev
     pull_policy: if_not_present
     env_file:
       - ./env/frontend.env
@@ -134,7 +134,7 @@ services:
 
   collab-server:
     container_name: openstream-collab
-    image: magentaaps/openstream-collab:7.2.0-dev
+    image: magentaaps/openstream-collab:7.2.11-dev
     pull_policy: if_not_present
     environment:
       NODE_ENV: production
@@ -151,7 +151,7 @@ services:
 
   polling-server:
     container_name: openstream-polling
-    image: magentaaps/openstream-polling:7.2.0-dev
+    image: magentaaps/openstream-polling:7.2.11-dev
     pull_policy: if_not_present
     env_file:
       - ./env/polling.env

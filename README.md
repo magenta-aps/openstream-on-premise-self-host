@@ -26,10 +26,12 @@ Replace all `changeme` values across the env files. The comments in each file in
 | File | Secrets |
 |---|---|
 | `env/db.env` | `POSTGRES_PASSWORD`, `KC_DB_PASSWORD` |
-| `env/backend.env` | `DJANGO_SECRET_KEY`, `DATABASE_PASSWORD`, `KEYCLOAK_ADMIN_PASSWORD`, `AWS_S3_SECRET` |
+| `env/backend.env` | `DJANGO_SECRET_KEY`, `DATABASE_PASSWORD`, `KEYCLOAK_ADMIN_PASSWORD`, `AWS_S3_SECRET`, `COLLAB_SERVER_API_KEY` |
 | `env/keycloak.env` | `KC_BOOTSTRAP_ADMIN_PASSWORD`, `KC_DB_PASSWORD` |
 | `env/minio.env` | `MINIO_ROOT_PASSWORD` |
 | `env/polling.env` | `PGPASSWORD` |
+
+> **Note:** `COLLAB_SERVER_API_KEY` is also set on the `collab-server` service in `compose.yml`. The two values must be identical — multiplayer editing fails to authorize if they differ.
 
 ### 3. Generate a TLS certificate
 
@@ -42,7 +44,7 @@ mkcert -install
 mkcert -cert-file certs/cert.pem -key-file certs/key.pem <SERVER_IP>
 ```
 
-Replace `<SERVER_IP>` with the same IP set in `.env`. The `certs/` directory is already created.
+Replace `<SERVER_IP>` with the same IP set in `.env`.
 
 To distribute the root CA to other clients, run:
 
@@ -119,7 +121,7 @@ The file is a JSON array where each element is a realm (organisation):
 |---|---|---|
 | `uri` | yes | Unique URL-safe slug for the organisation (e.g. `my-org`) |
 | `name` | yes | Display name |
-| `suborganisations` | no | List of sub-organisations; if omitted a "Global" sub-org is created automatically |
+| `suborganisations` | no | Additional sub-organisations to create. A "Global" sub-org is always created automatically regardless of this list |
 | `suborganisations[].name` | yes | Sub-organisation name, unique within the realm |
 | `suborganisations[].branches` | no | List of branch name strings within the sub-organisation |
 | `users[].username` | yes | Login username, unique within the realm |
