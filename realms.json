@@ -15,6 +15,42 @@
             "role": "org_admin"
           }
         ]
+      },
+      {
+        "username": "louis",
+        "password": "1234",
+        "kc_role": "org_admin",
+        "first_name": "Organisation",
+        "last_name": "Admin",
+        "roles": [
+          {
+            "role": "org_admin"
+          }
+        ]
+      },
+      {
+        "username": "freja",
+        "password": "1234",
+        "kc_role": "org_admin",
+        "first_name": "Organisation",
+        "last_name": "Admin",
+        "roles": [
+          {
+            "role": "org_admin"
+          }
+        ]
+      },
+      {
+        "username": "anders",
+        "password": "1234",
+        "kc_role": "org_admin",
+        "first_name": "Organisation",
+        "last_name": "Admin",
+        "roles": [
+          {
+            "role": "org_admin"
+          }
+        ]
       }
     ]
   }
