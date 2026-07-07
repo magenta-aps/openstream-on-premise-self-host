@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# SPDX-FileCopyrightText: 2025 Magenta ApS <https://magenta.dk>
-# SPDX-License-Identifier: AGPL-3.0-only
-
 set -e
 
 KC_DB_USERNAME=${KC_DB_USERNAME:-keycloak}
