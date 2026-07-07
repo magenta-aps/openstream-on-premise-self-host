@@ -7,6 +7,17 @@ Docker Compose setup for running OpenStream on a local on-premise server using p
 - Docker with Compose v2 (`docker compose`)
 - [mkcert](https://github.com/FiloSottile/mkcert) for generating TLS certificates
 
+On Ubuntu Server (tested on 24.04), install both mkcert and its `libnss3-tools` dependency (required for `mkcert -install` to work correctly):
+
+```bash
+sudo apt update
+sudo apt install mkcert libnss3-tools
+```
+
+For Docker with Compose v2, follow the official [Docker Engine install guide for Ubuntu](https://docs.docker.com/engine/install/ubuntu/).
+
+
+
 ## First-time setup
 
 ### 1. Set the server IP
@@ -21,7 +32,7 @@ This is the only place you need to define it — all services pick it up automat
 
 ### 2. Set passwords
 
-Replace all `changeme` values across the env files. The comments in each file indicate which values must match across files:
+Replace all placeholder secrets across the env files — every `changeme…` value plus `DJANGO_SECRET_KEY` (whose placeholder is `change-this-to-a-long-random-string`). The comments in each file indicate which values must match across files:
 
 | File | Secrets |
 |---|---|
@@ -31,13 +42,30 @@ Replace all `changeme` values across the env files. The comments in each file in
 | `env/minio.env` | `MINIO_ROOT_PASSWORD` |
 | `env/polling.env` | `PGPASSWORD` |
 
-> **Note:** `COLLAB_SERVER_API_KEY` is also set on the `collab-server` service in `compose.yml`. The two values must be identical — multiplayer editing fails to authorize if they differ.
+Because the same secret is shared by several services, some values must be **identical** across files (the file comments flag each one):
+
+| Shared secret | Must match across |
+|---|---|
+| PostgreSQL app password | `POSTGRES_PASSWORD` (db.env) · `DATABASE_PASSWORD` (backend.env) · `PGPASSWORD` (polling.env) |
+| Keycloak DB password | `KC_DB_PASSWORD` (db.env) · `KC_DB_PASSWORD` (keycloak.env) |
+| Keycloak admin password | `KEYCLOAK_ADMIN_PASSWORD` (backend.env) · `KC_BOOTSTRAP_ADMIN_PASSWORD` (keycloak.env) |
+| MinIO / S3 secret | `AWS_S3_SECRET` (backend.env) · `MINIO_ROOT_PASSWORD` (minio.env) |
+| Collab API key | `COLLAB_SERVER_API_KEY` (backend.env) · `COLLAB_SERVER_API_KEY` (compose.yml, `collab-server` service) |
+
+> **Note:** the Collab API key is the one secret set in `compose.yml` rather than an env file. If the two values differ, multiplayer editing fails to authorize.
 
 ### 3. Generate a TLS certificate
 
-Create a `certs/` folder in the project root.
+On Ubuntu, run the setup script from the project root. It checks the prerequisites (Docker Compose, mkcert, libnss3-tools, and `SERVER_IP`), generates the certificate into `certs/`, and exports the root CA to `ca-bundle/rootCA.pem`:
 
-Then run these commands from the project root:
+```bash
+bash scripts/setup-tls-ubuntu.sh
+```
+
+<details>
+<summary>Or do it manually</summary>
+
+Create a `certs/` folder in the project root, then run these commands from the project root:
 
 ```bash
 mkcert -install
@@ -52,7 +80,10 @@ To distribute the root CA to other clients, run:
 bash scripts/export-ca/export-ca.sh
 ```
 
-This copies the root CA into `ca-bundle/rootCA.pem`. Send that file to each client.
+This copies the root CA into `ca-bundle/rootCA.pem`.
+</details>
+
+Send `ca-bundle/rootCA.pem` to each client so they can import it.
 
 #### Importing the CA in a browser
 
@@ -143,9 +174,10 @@ The file is a JSON array where each element is a realm (organisation):
 
 ### 5. Pre-create data directories with correct ownership
 
-PostgreSQL and MinIO run as non-root users and will fail if the data directories are owned by root:
+PostgreSQL and MinIO run as non-root users and will fail if their data directories are owned by root. The `data/` directory is not part of the repository, so create the directories first, then set the correct ownership:
 
 ```bash
+mkdir -p data/postgres data/minio
 sudo chown 999:999 data/postgres
 sudo chown 1000:1000 data/minio
 ```
@@ -169,18 +201,26 @@ Once running, the services are available at:
 | Frontend | `https://SERVER_IP` |
 | Backend API | `https://SERVER_IP:8443` |
 | Keycloak | `https://SERVER_IP:8080` |
-| MinIO | `https://SERVER_IP:9443` |
+| MinIO (S3 API) | `https://SERVER_IP:9443` |
+| MinIO Console | `https://SERVER_IP:9444` |
 | Polling (SSE) | `https://SERVER_IP:3000` |
 | Collab (WebSocket) | `wss://SERVER_IP:3001` |
 
 ## Updating to a new version
 
-Edit `compose.yml` and change the image tags for `openstream`, `openstream-frontend`, `openstream-polling`, and `openstream-collab`, then pull and restart:
+Edit `compose.yml`, change the image tags to the new version, then pull and restart:
 
 ```bash
 docker compose pull
 docker compose up -d
 ```
+
+The application images share one version tag — update all of them together:
+
+- `magentaaps/openstream` — referenced **twice**, by both the `openstream` and `cron` services; update both tags, or the cron worker keeps running the old version
+- `magentaaps/openstream-frontend`
+- `magentaaps/openstream-polling`
+- `magentaaps/openstream-collab`
 
 Migrations run automatically on startup.
 
