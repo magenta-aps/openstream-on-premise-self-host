@@ -21,6 +21,10 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
+      # Root CA exported by scripts/export-ca; served at /rootCA.pem so clients
+      # can download and trust it. Directory mount (not file) so it survives the
+      # file not existing yet on first boot.
+      - ./ca-bundle:/etc/nginx/ca-bundle:ro
     networks:
       - openstream_net
     depends_on:

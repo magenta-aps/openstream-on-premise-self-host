@@ -83,7 +83,13 @@ bash scripts/export-ca/export-ca.sh
 This copies the root CA into `ca-bundle/rootCA.pem`.
 </details>
 
-Send `ca-bundle/rootCA.pem` to each client so they can import it.
+Once the stack is running (step 6), clients can download the root CA straight from the server instead of receiving the file by hand:
+
+```
+http://<SERVER_IP>/rootCA.pem
+```
+
+This is served over plain **HTTP** on purpose, so a client that does not yet trust the CA can fetch it without hitting a certificate warning. The same file is also available at `https://<SERVER_IP>/rootCA.pem` once the CA is trusted. (You can still copy `ca-bundle/rootCA.pem` to clients manually if you prefer.)
 
 #### Importing the CA in a browser
 
