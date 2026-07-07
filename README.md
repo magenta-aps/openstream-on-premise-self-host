@@ -198,6 +198,33 @@ docker compose up
 
 On first run, the database is initialized and all migrations are applied automatically. Keycloak may take up to 30 seconds to start.
 
+### 7. (Optional) Start automatically on boot
+
+On Ubuntu Server you can install a systemd service so the stack starts by itself whenever the machine boots (e.g. after a power cut or reboot). Run once from the project root:
+
+```bash
+bash scripts/install-service-ubuntu.sh
+```
+
+The script checks the prerequisites (Docker Compose, systemd, `SERVER_IP`, and the TLS certificate), then installs and enables an `openstream` systemd service that runs `docker compose up` in the foreground. It pulls the current images on each start, restarts on failure, and stops the containers cleanly on `systemctl stop`.
+
+Once installed, manage the stack with systemd instead of running `docker compose` by hand:
+
+```bash
+sudo systemctl status openstream      # check status
+sudo journalctl -u openstream -f      # follow logs
+sudo systemctl stop openstream        # stop the stack
+sudo systemctl start openstream       # start the stack
+```
+
+To remove the service again (containers are stopped; data under `data/` is untouched):
+
+```bash
+bash scripts/install-service-ubuntu.sh --uninstall
+```
+
+> **Note:** run the TLS setup (step 3) before installing the service — nginx will not start without a certificate. Re-running the install script overwrites the existing unit, so it is safe to run again after changing configuration.
+
 ## Service URLs
 
 Once running, the services are available at:
