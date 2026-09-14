@@ -239,6 +239,16 @@ Once running, the services are available at:
 | Polling (SSE) | `https://SERVER_IP:3000` |
 | Collab (WebSocket) | `wss://SERVER_IP:3001` |
 
+Port 3001 carries more than the editing WebSocket: the editor also sends a plain
+HTTPS `POST /flush/<room>` there before publishing, to force the collab server to
+write the shared document back to Django so the published version is not stale.
+That call is cross-origin (the page comes from `https://SERVER_IP`), so
+`COLLAB_ALLOWED_ORIGINS` on the `collab-server` service in `compose.yml` must
+list the origin the frontend is actually served from. It is derived from
+`SERVER_IP` by default, so a standard install needs no change — but if you put
+the frontend behind a different hostname, update it too or publishing fails with
+a permission error.
+
 ## Updating to a new version
 
 Edit `compose.yml`, change the image tags to the new version, then pull and restart:

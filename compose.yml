@@ -34,7 +34,7 @@ services:
 
   openstream:
     container_name: openstream
-    image: magentaaps/openstream:7.13.3
+    image: magentaaps/openstream:7.13.5
     pull_policy: if_not_present
     env_file:
       - ./env/backend.env
@@ -62,7 +62,7 @@ services:
 
   cron:
     container_name: openstream-cron
-    image: magentaaps/openstream:7.13.3
+    image: magentaaps/openstream:7.13.5
     pull_policy: if_not_present
     env_file:
       - ./env/backend.env
@@ -120,7 +120,7 @@ services:
 
   frontend:
     container_name: openstream-frontend
-    image: magentaaps/openstream-frontend:7.13.3
+    image: magentaaps/openstream-frontend:7.13.5
     pull_policy: if_not_present
     env_file:
       - ./env/frontend.env
@@ -135,7 +135,7 @@ services:
 
   collab-server:
     container_name: openstream-collab
-    image: magentaaps/openstream-collab:7.13.3
+    image: magentaaps/openstream-collab:7.13.5
     pull_policy: if_not_present
     environment:
       NODE_ENV: production
@@ -145,6 +145,20 @@ services:
       # env/backend.env. Required in production — the sidecar refuses to start
       # without it.
       COLLAB_SERVER_API_KEY: changeme_collab_key
+      # Origins allowed to call POST /flush from the browser (comma-separated).
+      # The editor calls it before publishing, to force the sidecar to write the
+      # shared document back to Django so the published version is not stale.
+      # It is cross-origin here: the page is served from https://${SERVER_IP}
+      # and the sidecar answers on https://${SERVER_IP}:3001. Leaving this unset
+      # reflects the request origin instead, which is also safe (the endpoint
+      # takes an explicit Bearer token and never cookies, so it carries no
+      # ambient authority) — but pin it, so a wrong frontend host fails loudly.
+      COLLAB_ALLOWED_ORIGINS: "https://${SERVER_IP}"
+      # How long POST /flush waits for the publishing editor's own edits to
+      # arrive over its WebSocket before giving up and answering "sync-timeout".
+      # The edits are sent before the HTTP call but travel on a different
+      # connection, so ordering is not guaranteed. Raise it on a slow link.
+      FLUSH_SYNC_TIMEOUT_MS: "2000"
     networks:
       - openstream_net
     depends_on:
@@ -152,7 +166,7 @@ services:
 
   polling-server:
     container_name: openstream-polling
-    image: magentaaps/openstream-polling:7.13.3
+    image: magentaaps/openstream-polling:7.13.5
     pull_policy: if_not_present
     env_file:
       - ./env/polling.env
